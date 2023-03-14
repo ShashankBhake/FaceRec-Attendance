@@ -28,7 +28,7 @@ Attendance Management System based on Face Recognition using Python and OpenCV
 ### Screenshots
 
 ### Basic UI
-<img src="https://github.com/ShashankBhake/Face-detection-based-Attendance-management-system/blob/main/GUI.jpg">
+<img src="https://github.com/ShashankBhake/FaceRec-Attendance/blob/main/GUI.jpg">
 
 
 
