@@ -37,7 +37,7 @@ Attendance Management System based on Face Recognition using Python and OpenCV
 <img src="https://github.com/ShashankBhake/FaceRec-Attendance/blob/main/StudentList.jpg">
 
 ### Model Trained message
-<img src="https://github.com/ShashankBhake/FaceRec-Attendance/blob/main/StudentList.jpg">
+<img src="https://github.com/ShashankBhake/FaceRec-Attendance/blob/main/trainedPopup.jpg">
 
 ### Note:
 - It requires high processing power(I have 8 GB RAM)
