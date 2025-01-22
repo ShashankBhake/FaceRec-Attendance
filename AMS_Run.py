@@ -46,17 +46,13 @@ def manually_fill():
         timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
         Time = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
         Hour, Minute, Second = timeStamp.split(":")
-        # Creatting csv of attendance
-
-        # Create table for Attendance
-        date_for_DB = datetime.datetime.fromtimestamp(ts).strftime('%Y_%m_%d')
         global subb
         subb = SUB_ENTRY.get()
         DB_table_name = str(subb + "_" + Date + "_Time_" + Hour + "_" + Minute + "_" + Second)
 
+        # Comment out database connection code since we're not using it
+        '''
         import pymysql.connections
-
-        # Connect to the database
         try:
             global cursor
             connection = pymysql.connect(host='localhost', user='root', password='', db='manually_fill_attendance')
@@ -77,7 +73,8 @@ def manually_fill():
         try:
             cursor.execute(sql)  # for create a table
         except Exception as ex:
-            print(ex)  #
+            print(ex)
+        '''
 
         if subb == '':
             err_screen_for_subject()
@@ -149,34 +146,28 @@ def manually_fill():
                     STUDENT_ENTRY.delete(first=0, last=22)
 
             def create_csv():
-                import csv
+                # Modified to use relative path
+                csv_name = os.path.join('Attendance', 'Manually Attendance' + DB_table_name + '.csv')
+                
+                # Comment out database operations
+                '''
                 cursor.execute("select * from " + DB_table_name + ";")
-                csv_name = 'C:/Users/shash/OneDrive/Desktop/Face-Recognition-Attendance-System-main/Face-Recognition-Attendance-System-main/Attendance/Manually Attendance'+DB_table_name+'.csv'
                 with open(csv_name, "w") as csv_file:
                     csv_writer = csv.writer(csv_file)
                     csv_writer.writerow([i[0] for i in cursor.description])  # write headers
                     csv_writer.writerows(cursor)
-                    O = "CSV created Successfully"
-                    Notifi.configure(text=O, bg="Green", fg="white",width=33, font=('times', 19, 'bold'))
-                    Notifi.place(x=180, y=380)
-                import csv
-                import tkinter
-                root = tkinter.Tk()
-                root.title("Attendance of " + subb)
-                root.configure(background='AliceBlue')
-                with open(csv_name, newline="") as file:
-                    reader = csv.reader(file)
-                    r = 0
-
-                    for col in reader:
-                        c = 0
-                        for row in col:
-                            # i've added some styling
-                            label = tkinter.Label(root, width=18, height=1, fg="black", font=('times', 13, ' bold '),bg="white", text=row, relief=tkinter.RIDGE)
-                            label.grid(row=r, column=c)
-                            c += 1
-                        r += 1
-                root.mainloop()
+                '''
+                
+                # Instead, create CSV directly from entered data
+                with open(csv_name, "w", newline='') as csv_file:
+                    csv_writer = csv.writer(csv_file)
+                    csv_writer.writerow(['ID', 'ENROLLMENT', 'NAME', 'DATE', 'TIME'])
+                    # Add the entered data
+                    csv_writer.writerow([1, ENR_ENTRY.get(), STUDENT_ENTRY.get(), Date, Time])
+                
+                O = "CSV created Successfully"
+                Notifi.configure(text=O, bg="Green", fg="white", width=33, font=('times', 19, 'bold'))
+                Notifi.place(x=180, y=380)
 
             Notifi = tk.Label(MFW, text="CSV created Successfully", bg="Green", fg="white", width=33,height=2, font=('times', 19, 'bold'))
 
@@ -193,8 +184,9 @@ def manually_fill():
             MAKE_CSV.place(x=570, y=300)
 
             def attf():
+                # Modified to use relative path
                 import subprocess
-                subprocess.Popen(r'explorer /select,"C:\Users\shash\OneDrive\Desktop\Face-Recognition-Attendance-System-main\Face-Recognition-Attendance-System-main\Attendance\Manually Attendance"')
+                subprocess.Popen(['open', 'Attendance'])  # 'open' command for macOS
 
             attf = tk.Button(MFW,  text="Check Sheets", command=attf, fg="white", bg="black",width=12, height=1, activebackground="white", font=('times', 14, ' bold '))
             attf.place(x=730, y=410)
@@ -282,7 +274,7 @@ def take_img():
                     # incrementing sample number
                     sampleNum = sampleNum + 1
                     # saving the captured face in the dataset folder
-                    cv2.imwrite("TrainingImage/ " + Name + "." + Enrollment + '.' + str(sampleNum) + ".jpg",gray)
+                    cv2.imwrite("TrainingImage/ " + Name + "." + Enrollment + '.' + str(sampleNum) + ".jpg", gray)
                     print("Images Saved for Enrollment :")
                     cv2.imshow('Frame', img)
                 # wait for 100 miliseconds
@@ -300,7 +292,7 @@ def take_img():
             Date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
             Time = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
             row = [Enrollment, Name, Date, Time]
-            with open('StudentDetails\StudentDetails.csv', 'a+') as csvFile:
+            with open('StudentDetails/StudentDetails.csv', 'a+') as csvFile:
                 writer = csv.writer(csvFile, delimiter=',')
                 writer.writerow(row)
                 csvFile.close()
@@ -318,14 +310,14 @@ def subjectchoose():
     def Fillattendances():
         sub = tx.get()
         now = time.time()  # For calculate seconds of video
-        future = now + 30
+        future = now + 5
         if time.time() < future:
             if sub == '':
                 err_screen1()
             else:
                 recognizer = cv2.face.LBPHFaceRecognizer_create()  # cv2.createLBPHFaceRecognizer()
                 try:
-                    recognizer.read("TrainingImageLabel\Trainner.yml")
+                    recognizer.read("TrainingImageLabel/Trainner.yml")
                 except:
                     e = 'Model not found,Please train model'
                     Notifica.configure(text=e, bg="red", fg="black", width=33, font=('times', 15, 'bold'))
@@ -333,7 +325,7 @@ def subjectchoose():
 
                 harcascadePath = "haarcascade_frontalface_default.xml"
                 faceCascade = cv2.CascadeClassifier(harcascadePath)
-                df = pd.read_csv("StudentDetails\StudentDetails.csv")
+                df = pd.read_csv("StudentDetails/StudentDetails.csv")
                 cam = cv2.VideoCapture(0)
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 col_names = ['Enrollment', 'Name', 'Date', 'Time']
@@ -373,7 +365,7 @@ def subjectchoose():
                         break
 
                     attendance = attendance.drop_duplicates(['Enrollment'], keep='first')
-                    cv2.imshow('Filling attedance..', im)
+                    cv2.imshow('Filling attendance..', im)
                     key = cv2.waitKey(30) & 0xff
                     if key == 27:
                         break
@@ -382,17 +374,17 @@ def subjectchoose():
                 date = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d')
                 timeStamp = datetime.datetime.fromtimestamp(ts).strftime('%H:%M:%S')
                 Hour, Minute, Second = timeStamp.split(":")
-                fileName = "Attendance/" + Subject + "_" + date + ".csv"
+                fileName = os.path.join("Attendance", Subject + "_" + date + ".csv")
                 attendance = attendance.drop_duplicates(['Enrollment'], keep='first')
                 print(attendance)
                 attendance.to_csv(fileName, index=False)
 
-                # Create table for Attendance
+                # Comment out database operations
+                '''
                 date_for_DB = datetime.datetime.fromtimestamp(ts).strftime('%Y_%m_%d')
                 DB_Table_name = str(Subject + "_" + date_for_DB + "_Time_" + Hour + "_" + Minute + "_" + Second)
                 import pymysql.connections
 
-                # Connect to the database
                 try:
                     global cursor
                     connection = pymysql.connect(host='localhost', user='root', password='', db='Face_reco_fill')
@@ -409,15 +401,14 @@ def subjectchoose():
                      PRIMARY KEY (ID)
                      );
                 """
-                # Now enter attendance in Database
                 insert_data = "INSERT INTO " + DB_Table_name + " (ID,ENROLLMENT,NAME,DATE,TIME) VALUES (0, %s, %s, %s,%s)"
                 VALUES = (str(Id), str(aa), str(date), str(timeStamp))
                 try:
-                    cursor.execute(sql)  # for create a table
-                    # For insert data into table
+                    cursor.execute(sql)
                     cursor.execute(insert_data, VALUES)
                 except Exception as ex:
-                    print(ex)  #
+                    print(ex)
+                '''
 
                 M = 'Attendance filled Successfully'
                 Notifica.configure(text=M, bg="Green", fg="white",width=33, font=('times', 15, 'bold'))
@@ -426,26 +417,8 @@ def subjectchoose():
                 cam.release()
                 cv2.destroyAllWindows()
 
-                import csv
-                import tkinter
-                root = tkinter.Tk()
-                root.title("Attendance of " + Subject)
-                root.configure(background='AliceBlue')
-                cs = 'C:/Users/shash/OneDrive/Desktop/Face-Recognition-Attendance-System-main/Face-Recognition-Attendance-System-main' + fileName
-                with open(cs, newline="") as file:
-                    reader = csv.reader(file)
-                    r = 0
-
-                    for col in reader:
-                        c = 0
-                        for row in col:
-                            # i've added some styling
-                            label = tkinter.Label(root, width=10, height=1, fg="black", font=('times', 15, ' bold '),bg="white", text=row, relief=tkinter.RIDGE)
-                            label.grid(row=r, column=c)
-                            c += 1
-                        r += 1
-                root.mainloop()
-                print(attendance)
+                # Modified to use relative path
+                cs = os.path.join(os.getcwd(), fileName)
 
     # windo is frame for subject chooser
     windo = tk.Tk()
@@ -457,8 +430,9 @@ def subjectchoose():
     Notifica = tk.Label(windo, text="Attendance filled Successfully", bg="Green", fg="white", width=33,height=2, font=('times', 15, 'bold'))
 
     def Attf():
+        # Modified for macOS
         import subprocess
-        subprocess.Popen(r'explorer /select,"C:\Users\shash\OneDrive\Desktop\Face-Recognition-Attendance-System-main\Face-Recognition-Attendance-System-main\Attendance\"')
+        subprocess.Popen(['open', 'Attendance'])
 
     attf = tk.Button(windo,  text="Check Sheets", command=Attf, fg="white", bg="black",width=12, height=1, activebackground="white", font=('times', 14, ' bold '))
     attf.place(x=430, y=255)
@@ -494,7 +468,7 @@ def admin_panel():
                 root.title("Student Details")
                 root.configure(background='AliceBlue')
 
-                cs = 'C:/Users/shash/OneDrive/Desktop/Face-Recognition-Attendance-System-main/Face-Recognition-Attendance-System-main/StudentDetails/StudentDetails.csv'
+                cs = os.path.join('StudentDetails', 'StudentDetails.csv')
                 with open(cs, newline="") as file:
                     reader = csv.reader(file)
                     r = 0
@@ -560,15 +534,15 @@ def trainimg():
         faces, Id = getImagesAndLabels("TrainingImage")
     except Exception as e:
         l = 'please make "TrainingImage" folder & put Images'
-        Notification.configure(text=l, bg="SpringGreen3",width=50, font=('times', 18, 'bold'))
+        Notification.configure(text=l, bg="SpringGreen3", width=50, font=('times', 18, 'bold'))
         Notification.place(x=350, y=400)
 
     recognizer.train(faces, np.array(Id))
     try:
-        recognizer.save("TrainingImageLabel\Trainner.yml")
+        recognizer.save("TrainingImageLabel/Trainner.yml")
     except Exception as e:
         q = 'Please make "TrainingImageLabel" folder'
-        Notification.configure(text=q, bg="SpringGreen3",width=50, font=('times', 18, 'bold'))
+        Notification.configure(text=q, bg="SpringGreen3", width=50, font=('times', 18, 'bold'))
         Notification.place(x=350, y=400)
 
     res = "Model Trained"  # +",".join(str(f) for f in Id)
